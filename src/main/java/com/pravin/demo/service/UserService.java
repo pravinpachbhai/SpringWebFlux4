@@ -1,6 +1,8 @@
 package com.pravin.demo.service;
 
 import com.pravin.demo.entity.Customer;
+import com.pravin.demo.exception.CustomerFoundException;
+import com.pravin.demo.exception.CustomerNotFoundException;
 import com.pravin.demo.repository.UserRepository;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -22,14 +24,14 @@ public class UserService {
     public Mono<Customer> getUserById(Long id) {
         return userRepository.findById(id)
                 .switchIfEmpty(Mono.error(
-                        new RuntimeException("User not found with id: " + id)));
+                        new CustomerNotFoundException("User not found with id: " + id)));
     }
 
     public Mono<Customer> save(Customer user) {
         return userRepository.findByEmail(user.getEmail())
                 // If user exists, throw error
-                .flatMap(existingUser -> Mono.<Customer>error(
-                        new RuntimeException("Email already in use")))
+                .flatMap(existingUser -> Mono.<Customer>error( () ->
+                        new CustomerFoundException("Email already in use")))
                 // Otherwise, save the user
                 .switchIfEmpty(userRepository.save(user));
     }
@@ -37,7 +39,7 @@ public class UserService {
     public Mono<Customer> updateUser(Long id, Customer user) {
         return userRepository.findById(id)
                 .switchIfEmpty(Mono.error(
-                        new RuntimeException("User not found")))
+                        () -> new CustomerNotFoundException("User not found")))
                 .flatMap(existingUser -> {
                     existingUser.setName(user.getName());
                     existingUser.setEmail(user.getEmail());
@@ -51,7 +53,7 @@ public class UserService {
     public Mono<Void> deleteUser(Long id) {
         return userRepository.findById(id)
                 .switchIfEmpty(Mono.error(
-                        new RuntimeException("User not found")))
+                        new CustomerNotFoundException("User not found")))
                 .flatMap(userRepository::delete);
     }
 }

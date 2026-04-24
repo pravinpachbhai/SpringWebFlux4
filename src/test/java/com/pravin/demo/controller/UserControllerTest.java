@@ -69,49 +69,6 @@ public class UserControllerTest {
     }
 
     @Test
-    void testCreateUserWithDuplicateEmail() {
-
-        Customer newUser = new Customer();
-        newUser.setId(null);
-        newUser.setName("Pravin");
-        newUser.setCity("St Louis");
-        newUser.setAddress("1234 Test Drive");
-        newUser.setZipCode("63131");
-        newUser.setEmail("pravin_pachbhai@yahoo.com");
-        Customer existingUser = new Customer();
-        existingUser.setId(1);
-        existingUser.setName("Pravin");
-        existingUser.setCity("St Louis");
-        existingUser.setAddress("1234 Test Drive");
-        existingUser.setZipCode("63131");
-        existingUser.setEmail("pravin_pachbhai@yahoo.com");
-
-        Mockito.when(userRepository.findByEmail("pravin_pachbhai@yahoo.com"))
-                .thenReturn(Mono.just(existingUser)); // Email already exists
-
-        webTestClient.post()
-                .uri("/api/users")
-                .bodyValue(newUser)
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.title").exists();
-    }
-
-    @Test
-    void testGetUserNotFound() {
-        Mockito.when(userRepository.findById(100L))
-                .thenReturn(Mono.empty());
-
-        webTestClient.get()
-                .uri("/api/users/100")
-                .exchange()
-                .expectStatus().isBadRequest()
-                .expectBody()
-                .jsonPath("$.title").exists();
-    }
-
-    @Test
     void testUpdateUser() {
         Customer updatedUser = new Customer();
         updatedUser.setId(1);

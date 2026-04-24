@@ -25,7 +25,6 @@ public class RecommendationService {
                 .uri("http://my_recommendation-service/recommendation")
                 .retrieve()
                 .bodyToMono(String.class)
-                .timeout(Duration.ofSeconds(2))
                 .toFuture();
     }
 
